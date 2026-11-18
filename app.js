@@ -10,6 +10,7 @@
   var STALE_MS = 10 * 60 * 1000;      // 切回标签时，超过 10 分钟未刷新就重新加载网页
   var frames = {};                    // tab -> {el, loadedAt, ver}
   var latest = {};                    // tab -> 最新版本标识（日期/更新时间）
+  var current = 'home';
 
   function $(id) { return document.getElementById(id); }
   function store(k, v) {
@@ -162,9 +163,32 @@
     var f = document.createElement('iframe');
     f.src = SITES[tab];
     f.title = tab;
-    f.onload = function () { var l = v.querySelector('.loading'); if (l) l.remove(); };
+    f.onload = function () {
+      var l = v.querySelector('.loading'); if (l) l.remove();
+      frames[tab].color = siteColor(f);
+      if (current === tab) paintBar(tab);
+    };
     v.appendChild(f);
     frames[tab] = { el: f, loadedAt: Date.now(), ver: latest[tab] };
+  }
+  // 读网站顶部的背景色（同域名 github.io，可以直接读），状态栏用同色，看起来像网站自己的顶栏
+  function siteColor(f) {
+    try {
+      var doc = f.contentDocument, win = f.contentWindow;
+      var el = doc.elementFromPoint(Math.min(40, win.innerWidth / 2), 2);
+      while (el) {
+        var c = win.getComputedStyle(el).backgroundColor;
+        if (c && c !== 'transparent' && !/rgba\(.*,\s*0\)$/.test(c)) return c;
+        el = el.parentElement;
+      }
+      return win.getComputedStyle(doc.body).backgroundColor || null;
+    } catch (e) { return null; }
+  }
+  function paintBar(tab) {
+    var c = (frames[tab] && frames[tab].color) || '';
+    $('sbar').style.background = c;
+    var m = document.querySelector('meta[name="theme-color"]');
+    if (m) m.setAttribute('content', tab === 'home' || !c ? '#0f2348' : c);
   }
   function reloadFrame(tab) {
     var f = frames[tab];
@@ -178,6 +202,9 @@
     if (!/^(home|review|news|alert|quant)$/.test(tab)) tab = 'home';
     document.querySelectorAll('.view').forEach(function (v) { v.classList.toggle('active', v.id === 'v-' + tab); });
     document.querySelectorAll('#tabbar button').forEach(function (b) { b.classList.toggle('on', b.dataset.tab === tab); });
+    current = tab;
+    $('app').classList.toggle('on-site', tab !== 'home');
+    paintBar(tab);
     if (tab === 'home') return;
     if (latest[tab]) store('seen-' + tab, latest[tab]);
     var w = $('c-' + tab).querySelector('.when');
