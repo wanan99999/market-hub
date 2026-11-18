@@ -1,6 +1,6 @@
 // 只缓存本应用外壳（离线也能打开）；四个网站的数据始终走网络，保证最新
-var CACHE = 'hub-v2';
-var SHELL = ['./', 'index.html', 'app.css?v=2', 'app.js?v=2', 'manifest.webmanifest', 'icons/icon-192.png'];
+var CACHE = 'hub-v3';
+var SHELL = ['./', 'index.html', 'app.css?v=2', 'app.js?v=3', 'manifest.webmanifest', 'icons/icon-192.png'];
 
 self.addEventListener('install', function (e) {
   e.waitUntil(caches.open(CACHE).then(function (c) { return c.addAll(SHELL); }).then(function () { return self.skipWaiting(); }));

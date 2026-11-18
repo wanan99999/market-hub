@@ -177,8 +177,10 @@
       var doc = f.contentDocument, win = f.contentWindow;
       var el = doc.elementFromPoint(Math.min(40, win.innerWidth / 2), 2);
       while (el) {
-        var c = win.getComputedStyle(el).backgroundColor;
+        var cs = win.getComputedStyle(el), c = cs.backgroundColor;
         if (c && c !== 'transparent' && !/rgba\(.*,\s*0\)$/.test(c)) return c;
+        var g = /gradient/.test(cs.backgroundImage) && /(rgba?\([^)]+\)|#[0-9a-f]{3,8})/i.exec(cs.backgroundImage);
+        if (g) return g[1];   // 渐变顶栏取第一个颜色
         el = el.parentElement;
       }
       return win.getComputedStyle(doc.body).backgroundColor || null;
