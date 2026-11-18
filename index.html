@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="zh-CN">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
+<title>市场看板</title>
+<meta name="description" content="收盘复盘、财经要闻、风险预警、量化策略库四站合一">
+<meta name="theme-color" content="#0f2348">
+<meta name="apple-mobile-web-app-capable" content="yes">
+<meta name="mobile-web-app-capable" content="yes">
+<meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+<meta name="apple-mobile-web-app-title" content="市场看板">
+<link rel="manifest" href="manifest.webmanifest">
+<link rel="icon" href="icons/favicon.png">
+<link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
+<link rel="stylesheet" href="app.css?v=1">
+</head>
+<body>
+<main id="views">
+  <section class="view active" id="v-home">
+    <header class="hub-top">
+      <div>
+        <h1>市场看板</h1>
+        <p id="checked">正在读取四个网站的最新数据…</p>
+      </div>
+      <button class="icon-btn" id="refresh" aria-label="刷新数据">
+        <svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.34-5.66M20 4v5h-5"/></svg>
+      </button>
+    </header>
+    <div class="cards" id="cards">
+      <article class="card" data-go="alert" id="c-alert">
+        <div class="card-h"><span class="tag t-alert">风险预警</span><span class="when"></span></div>
+        <div class="card-b skeleton"></div>
+      </article>
+      <article class="card" data-go="review" id="c-review">
+        <div class="card-h"><span class="tag t-review">收盘复盘</span><span class="when"></span></div>
+        <div class="card-b skeleton"></div>
+      </article>
+      <article class="card" data-go="news" id="c-news">
+        <div class="card-h"><span class="tag t-news">财经要闻</span><span class="when"></span></div>
+        <div class="card-b skeleton"></div>
+      </article>
+      <article class="card" data-go="quant" id="c-quant">
+        <div class="card-h"><span class="tag t-quant">量化策略库</span><span class="when"></span></div>
+        <div class="card-b skeleton"></div>
+      </article>
+      <p class="foot">内容直接来自四个网站，网站更新后这里自动显示最新一期。<br><a href="#" id="install-tip">添加到手机主屏幕</a></p>
+    </div>
+  </section>
+  <section class="view" id="v-review"></section>
+  <section class="view" id="v-news"></section>
+  <section class="view" id="v-alert"></section>
+  <section class="view" id="v-quant"></section>
+</main>
+
+<nav class="tabbar" id="tabbar">
+  <button data-tab="home" class="on"><svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg><span>概览</span></button>
+  <button data-tab="review"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span>复盘</span></button>
+  <button data-tab="news"><svg viewBox="0 0 24 24"><path d="M5 4h11v16H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1zM16 8h3a1 1 0 0 1 1 1v9a2 2 0 0 1-4 0M8 8h5M8 12h5M8 16h3"/></svg><span>要闻</span></button>
+  <button data-tab="alert"><svg viewBox="0 0 24 24"><path d="M12 3l9.5 17h-19zM12 10v4M12 17.5v.5"/></svg><span>预警</span><i class="dot" id="alert-dot"></i></button>
+  <button data-tab="quant"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h7M17 15l2 2 3-4"/></svg><span>策略</span></button>
+</nav>
+
+<div class="sheet" id="sheet" hidden>
+  <div class="sheet-box">
+    <h3>添加到主屏幕</h3>
+    <p><b>iPhone（Safari）</b>：点底部「分享」→「添加到主屏幕」。</p>
+    <p><b>安卓（Chrome / Edge）</b>：点右上角菜单 →「添加到主屏幕」或「安装应用」。</p>
+    <p><b>微信里打开的</b>：先点右上角「…」→「在浏览器打开」，再按上面操作。</p>
+    <button id="sheet-close">知道了</button>
+  </div>
+</div>
+<script src="app.js?v=1"></script>
+</body>
+</html>
