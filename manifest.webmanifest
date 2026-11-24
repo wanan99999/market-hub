@@ -1,7 +1,7 @@
 {
   "name": "市场看板",
   "short_name": "市场看板",
-  "description": "收盘复盘、财经要闻、风险预警、量化策略库四站合一",
+  "description": "策略信号、收盘复盘、财经要闻、风险预警、量化策略库五站合一",
   "start_url": "./",
   "scope": "./",
   "display": "standalone",

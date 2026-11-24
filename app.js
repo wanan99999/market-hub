@@ -2,6 +2,7 @@
   'use strict';
   var BASE = 'https://wanan99999.github.io/';
   var SITES = {
+    signal: BASE + 'signal-monitor/',
     review: BASE + 'market-review/index.html',
     news: BASE + 'finance-news-daily/index.html',
     alert: BASE + 'astock-daily-alert/',
@@ -62,7 +63,30 @@
     setCard(tab, '', '<p class="err">暂时没连上网站，点刷新按钮重试；也可以直接点这里打开网页。</p>');
   }
 
-  /* ---------- 四个数据源 ---------- */
+  /* ---------- 五个数据源 ---------- */
+  // 策略信号：和 signal-monitor 同一个域名，直接读它存在浏览器里的「看哪些策略 / 从哪天开始跟」
+  function loadSignal() {
+    var root = BASE + 'signal-monitor/data/';
+    return getJSON(root + 'signals.json').then(function (j) {
+      var picked = null, starts = {};
+      try { picked = JSON.parse(localStorage.getItem('sig-picked')); } catch (e) {}
+      try { starts = JSON.parse(localStorage.getItem('sig-start')) || {}; } catch (e) {}
+      var list = j.strategies.filter(function (s) { return !Array.isArray(picked) || picked.indexOf(s.id) >= 0; });
+      var act = 0, rows = list.map(function (s) {
+        var sd = s.starts[starts[s.id]] ? starts[s.id] : s.default_start, x = s.starts[sd] || [];
+        var nb = x[1] || 0, ns = x[2] || 0;
+        if (nb + ns) act++;
+        return '<div class="sg" data-sid="' + esc(s.id) + '"><span class="n">' + esc(s.title) + '<small>' + esc(md(sd)) + '起跟 · 持有 ' + (x[3] || 0) +
+          ' 只 · ' + (x[4] ? '今天调仓日' : '下次调仓 ' + esc(md(x[5]))) + '</small></span>' +
+          '<span class="bs' + (nb ? ' b-on' : '') + '">买入 ' + nb + '</span><span class="bs' + (ns ? ' s-on' : '') + '">卖出 ' + ns + '</span></div>';
+      }).join('');
+      var mode = j.mode === 'intraday' ? '盘中提示' : '收盘复核';
+      var h = '<p class="title">' + (list.length ? (act ? act + ' 个策略今天要操作' : '今天都不用操作') : '还没选择策略') + '</p>' + rows;
+      $('signal-dot').classList.toggle('show', act > 0 && j.date === new Date(Date.now() + 8 * 3600e3).toISOString().slice(0, 10));
+      setCard('signal', md(j.date) + ' ' + mode + ' · ' + j.quote_time, h, j.updated);
+    }).catch(function () { failCard('signal'); });
+  }
+
   function loadAlert() {
     var root = BASE + 'astock-daily-alert/data/';
     return Promise.all([
@@ -147,10 +171,10 @@
   function refreshAll() {
     var btn = $('refresh');
     btn.classList.add('spin');
-    return Promise.all([loadAlert(), loadReview(), loadNews(), loadQuant()]).then(function () {
+    return Promise.all([loadSignal(), loadAlert(), loadReview(), loadNews(), loadQuant()]).then(function () {
       btn.classList.remove('spin');
       var n = new Date();
-      $('checked').textContent = '已同步四个网站 · ' + n.getHours() + ':' + String(n.getMinutes()).padStart(2, '0');
+      $('checked').textContent = '已同步五个网站 · ' + n.getHours() + ':' + String(n.getMinutes()).padStart(2, '0');
       store('lastCheck', String(Date.now()));
     });
   }
@@ -201,7 +225,9 @@
     f.ver = latest[tab];
   }
   function show(tab) {
-    if (!/^(home|review|news|alert|quant)$/.test(tab)) tab = 'home';
+    var sub = '';
+    if (/^signal\//.test(tab)) { sub = tab.slice(7); tab = 'signal'; }     // signal/策略id：直接打开该策略
+    if (!/^(home|signal|review|news|alert|quant)$/.test(tab)) tab = 'home';
     document.querySelectorAll('.view').forEach(function (v) { v.classList.toggle('active', v.id === 'v-' + tab); });
     document.querySelectorAll('#tabbar button').forEach(function (b) { b.classList.toggle('on', b.dataset.tab === tab); });
     current = tab;
@@ -211,8 +237,11 @@
     if (latest[tab]) store('seen-' + tab, latest[tab]);
     var w = $('c-' + tab).querySelector('.when');
     if (w) w.classList.remove('new');
-    if (!frames[tab]) ensureFrame(tab);
-    else if (Date.now() - frames[tab].loadedAt > STALE_MS) reloadFrame(tab);
+    if (!frames[tab]) { ensureFrame(tab); if (sub) frames[tab].el.src = SITES[tab] + '#/' + sub; }
+    else {
+      if (Date.now() - frames[tab].loadedAt > STALE_MS) reloadFrame(tab);
+      if (sub) { try { frames[tab].el.contentWindow.location.hash = '#/' + sub; } catch (e) { frames[tab].el.src = SITES[tab] + '#/' + sub; } }
+    }
   }
   function go(tab) {
     if (location.hash.slice(1) === tab) show(tab);
@@ -227,6 +256,8 @@
     go(tab);
   });
   $('cards').addEventListener('click', function (e) {
+    var r = e.target.closest('.sg');
+    if (r) { go('signal/' + r.dataset.sid); return; }
     var c = e.target.closest('.card');
     if (c) go(c.dataset.go);
   });
