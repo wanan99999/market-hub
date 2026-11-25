@@ -71,7 +71,8 @@
       var picked = null, starts = {};
       try { picked = JSON.parse(localStorage.getItem('sig-picked')); } catch (e) {}
       try { starts = JSON.parse(localStorage.getItem('sig-start')) || {}; } catch (e) {}
-      var list = j.strategies.filter(function (s) { return !Array.isArray(picked) || picked.indexOf(s.id) >= 0; });
+      var seen = []; try { seen = JSON.parse(localStorage.getItem('sig-seen')) || []; } catch (e) {}
+      var list = j.strategies.filter(function (s) { return !Array.isArray(picked) || picked.indexOf(s.id) >= 0 || (s.id.indexOf('u-') === 0 && seen.indexOf(s.id) < 0); });
       var act = 0, rows = list.map(function (s) {
         var sd = s.starts[starts[s.id]] ? starts[s.id] : s.default_start, x = s.starts[sd] || [];
         var nb = x[1] || 0, ns = x[2] || 0;
