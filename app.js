@@ -178,12 +178,16 @@
   }
 
   /* ---------- 标签与网页 ---------- */
-  function ensureFrame(tab) {
+  // 网站地址一律加时间戳：GitHub Pages 页面会被浏览器缓存 10 分钟（主屏幕模式更久），不加就可能打开旧版
+  function freshUrl(tab, sub) {
+    return SITES[tab] + (SITES[tab].indexOf('?') < 0 ? '?' : '&') + 't=' + Date.now() + (sub ? '#/' + sub : '');
+  }
+  function ensureFrame(tab, sub) {
     if (frames[tab]) return;
     var v = $('v-' + tab);
     v.innerHTML = '<div class="loading">正在打开…</div>';
     var f = document.createElement('iframe');
-    f.src = SITES[tab];
+    f.src = freshUrl(tab, sub);
     f.title = tab;
     f.onload = function () {
       var l = v.querySelector('.loading'); if (l) l.remove();
@@ -217,8 +221,7 @@
   function reloadFrame(tab) {
     var f = frames[tab];
     if (!f) return;
-    // 加时间戳强制拿网站最新版本
-    f.el.src = SITES[tab] + (SITES[tab].indexOf('?') < 0 ? '?' : '&') + 't=' + Date.now();
+    f.el.src = freshUrl(tab);
     f.loadedAt = Date.now();
     f.ver = latest[tab];
   }
@@ -235,10 +238,10 @@
     if (latest[tab]) store('seen-' + tab, latest[tab]);
     var w = $('c-' + tab).querySelector('.when');
     if (w) w.classList.remove('new');
-    if (!frames[tab]) { ensureFrame(tab); if (sub) frames[tab].el.src = SITES[tab] + '#/' + sub; }
+    if (!frames[tab]) ensureFrame(tab, sub);
     else {
       if (Date.now() - frames[tab].loadedAt > STALE_MS) reloadFrame(tab);
-      if (sub) { try { frames[tab].el.contentWindow.location.hash = '#/' + sub; } catch (e) { frames[tab].el.src = SITES[tab] + '#/' + sub; } }
+      if (sub) { try { frames[tab].el.contentWindow.location.hash = '#/' + sub; } catch (e) { frames[tab].el.src = freshUrl(tab, sub); } }
     }
   }
   function go(tab) {
