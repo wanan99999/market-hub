@@ -27,11 +27,6 @@
     return fetch(url + (url.indexOf('?') < 0 ? '?' : '&') + 't=' + Date.now(), { cache: 'no-store' })
       .then(function (r) { if (!r.ok) throw new Error(r.status); return r.json(); });
   }
-  function getText(url) {
-    return fetch(url + '?t=' + Date.now(), { cache: 'no-store' }).then(function (r) {
-      if (!r.ok) throw new Error(r.status); return r.text();
-    });
-  }
   function pct(v) {
     if (v == null || isNaN(v)) return '';
     var cls = v > 0 ? 'up' : v < 0 ? 'down' : '';
@@ -152,20 +147,22 @@
     }).catch(function () { failCard('news'); });
   }
 
+  // 策略库：读它发布的 strategies.json（不再解析网页 HTML）+ 信号监控发布的「我的组合」清单
   function loadQuant() {
-    return getText(SITES.quant).then(function (html) {
-      var doc = new DOMParser().parseFromString(html, 'text/html');
-      var names = Array.prototype.map.call(doc.querySelectorAll('a.card h3, a[href^="s/"] h3'), function (e) {
-        return e.textContent.trim();
-      });
-      var groups = Array.prototype.map.call(doc.querySelectorAll('h2'), function (e) {
-        return e.textContent.trim();
-      }).filter(Boolean);
-      var h = '<p class="title">共 ' + names.length + ' 个策略</p>';
-      if (groups.length) h += '<p class="muted" style="margin:0">' + groups.map(esc).join(' · ') + '</p>';
-      h += '<div class="chips">' + names.slice(0, 6).map(function (n) { return '<span>' + esc(n) + '</span>'; }).join('') +
+    return Promise.all([
+      getJSON(BASE + 'quant-strategies/strategies.json'),
+      getJSON(BASE + 'signal-monitor/data/combos/list.json').catch(function () { return []; })
+    ]).then(function (r) {
+      var all = r[0].strategies || [], mine = Array.isArray(r[1]) ? r[1] : [];
+      var groups = (r[0].cats || []).map(function (c) {
+        return c.name + ' ' + all.filter(function (s) { return s.cat === c.id; }).length;
+      }).concat(['我的组合策略 ' + mine.length]);
+      var names = all.map(function (s) { return s.title; });
+      var h = '<p class="title">共 ' + all.length + ' 个策略' + (mine.length ? ' + ' + mine.length + ' 个自建组合' : '') + '</p>' +
+        '<p class="muted" style="margin:0">' + groups.map(esc).join(' · ') + '</p>' +
+        '<div class="chips">' + names.slice(0, 6).map(function (n) { return '<span>' + esc(n) + '</span>'; }).join('') +
         (names.length > 6 ? '<span>…</span>' : '') + '</div>';
-      setCard('quant', '', h, names.join('|'));
+      setCard('quant', '', h, all.map(function (s) { return s.slug + s.ret; }).join('|') + '|' + mine.map(function (c) { return c.id + c.updated_at; }).join('|'));
     }).catch(function () { failCard('quant'); });
   }
 
