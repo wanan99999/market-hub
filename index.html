@@ -4,7 +4,7 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover">
 <title>市场看板</title>
-<meta name="description" content="策略信号、收盘复盘、财经要闻、风险预警、量化策略库五站合一">
+<meta name="description" content="策略信号、收盘复盘、创新高热点、财经要闻、风险预警、量化策略库六站合一">
 <meta name="theme-color" content="#0f2348">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="mobile-web-app-capable" content="yes">
@@ -13,7 +13,7 @@
 <link rel="manifest" href="manifest.webmanifest">
 <link rel="icon" href="icons/favicon.png">
 <link rel="apple-touch-icon" href="icons/apple-touch-icon.png">
-<link rel="stylesheet" href="app.css?v=3">
+<link rel="stylesheet" href="app.css?v=4">
 </head>
 <body>
 <div id="app">
@@ -23,7 +23,7 @@
     <header class="hub-top">
       <div>
         <h1>市场看板</h1>
-        <p id="checked">正在读取五个网站的最新数据…</p>
+        <p id="checked">正在读取六个网站的最新数据…</p>
       </div>
       <button class="icon-btn" id="refresh" aria-label="刷新数据">
         <svg viewBox="0 0 24 24"><path d="M20 12a8 8 0 1 1-2.34-5.66M20 4v5h-5"/></svg>
@@ -42,6 +42,10 @@
         <div class="card-h"><span class="tag t-review">收盘复盘</span><span class="when"></span></div>
         <div class="card-b skeleton"></div>
       </article>
+      <article class="card" data-go="newhigh" id="c-newhigh">
+        <div class="card-h"><span class="tag t-newhigh">创新高热点</span><span class="when"></span></div>
+        <div class="card-b skeleton"></div>
+      </article>
       <article class="card" data-go="news" id="c-news">
         <div class="card-h"><span class="tag t-news">财经要闻</span><span class="when"></span></div>
         <div class="card-b skeleton"></div>
@@ -50,11 +54,12 @@
         <div class="card-h"><span class="tag t-quant">量化策略库</span><span class="when"></span></div>
         <div class="card-b skeleton"></div>
       </article>
-      <p class="foot">内容直接来自五个网站，网站更新后这里自动显示最新一期。<br><a href="#" id="install-tip">添加到手机主屏幕</a></p>
+      <p class="foot">内容直接来自六个网站，网站更新后这里自动显示最新一期。<br><a href="#" id="install-tip">添加到手机主屏幕</a></p>
     </div>
   </section>
   <section class="view site" id="v-signal"></section>
   <section class="view site" id="v-review"></section>
+  <section class="view site" id="v-newhigh"></section>
   <section class="view site" id="v-news"></section>
   <section class="view site" id="v-alert"></section>
   <section class="view site" id="v-quant"></section>
@@ -64,6 +69,7 @@
   <button data-tab="home" class="on"><svg viewBox="0 0 24 24"><path d="M3 11l9-7 9 7v9a1 1 0 0 1-1 1h-5v-6H9v6H4a1 1 0 0 1-1-1z"/></svg><span>概览</span></button>
   <button data-tab="signal"><svg viewBox="0 0 24 24"><path d="M3 17l6-6 4 4 8-8M15 7h6v6"/></svg><span>信号</span><i class="dot" id="signal-dot"></i></button>
   <button data-tab="review"><svg viewBox="0 0 24 24"><path d="M4 20V10M10 20V4M16 20v-7M22 20H2"/></svg><span>复盘</span></button>
+  <button data-tab="newhigh"><svg viewBox="0 0 24 24"><path d="M3 20l6-9 4 5 3-4 5 8zM16 3v8M16 3h4l-1.2 1.5L20 6h-4"/></svg><span>新高</span></button>
   <button data-tab="news"><svg viewBox="0 0 24 24"><path d="M5 4h11v16H5a1 1 0 0 1-1-1V5a1 1 0 0 1 1-1zM16 8h3a1 1 0 0 1 1 1v9a2 2 0 0 1-4 0M8 8h5M8 12h5M8 16h3"/></svg><span>要闻</span></button>
   <button data-tab="alert"><svg viewBox="0 0 24 24"><path d="M12 3l9.5 17h-19zM12 10v4M12 17.5v.5"/></svg><span>预警</span><i class="dot" id="alert-dot"></i></button>
   <button data-tab="quant"><svg viewBox="0 0 24 24"><path d="M4 6h16M4 12h10M4 18h7M17 15l2 2 3-4"/></svg><span>策略</span></button>
@@ -79,6 +85,6 @@
     <button id="sheet-close">知道了</button>
   </div>
 </div>
-<script src="app.js?v=6"></script>
+<script src="app.js?v=7"></script>
 </body>
 </html>

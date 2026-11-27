@@ -1,6 +1,6 @@
-// 只缓存本应用外壳（离线也能打开）；五个网站的数据始终走网络，保证最新
-var CACHE = 'hub-v6';
-var SHELL = ['./', 'index.html', 'app.css?v=3', 'app.js?v=6', 'manifest.webmanifest', 'icons/icon-192.png'];
+// 只缓存本应用外壳（离线也能打开）；六个网站的数据始终走网络，保证最新
+var CACHE = 'hub-v7';
+var SHELL = ['./', 'index.html', 'app.css?v=4', 'app.js?v=7', 'manifest.webmanifest', 'icons/icon-192.png'];
 
 self.addEventListener('install', function (e) {
   e.waitUntil(caches.open(CACHE).then(function (c) { return c.addAll(SHELL); }).then(function () { return self.skipWaiting(); }));

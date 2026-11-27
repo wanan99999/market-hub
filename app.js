@@ -4,6 +4,7 @@
   var SITES = {
     signal: BASE + 'signal-monitor/',
     review: BASE + 'market-review/index.html',
+    newhigh: BASE + 'ashare-newhigh/index.html',
     news: BASE + 'finance-news-daily/index.html',
     alert: BASE + 'astock-daily-alert/',
     quant: BASE + 'quant-strategies/index.html'
@@ -58,7 +59,7 @@
     setCard(tab, '', '<p class="err">暂时没连上网站，点刷新按钮重试；也可以直接点这里打开网页。</p>');
   }
 
-  /* ---------- 五个数据源 ---------- */
+  /* ---------- 六个数据源 ---------- */
   // 策略信号：和 signal-monitor 同一个域名，直接读它存在浏览器里的「看哪些策略 / 从哪天开始跟」
   function loadSignal() {
     var root = BASE + 'signal-monitor/data/';
@@ -132,6 +133,24 @@
     }).catch(function () { failCard('review'); });
   }
 
+  // 创新高热点：读网站输出的最新一天摘要 latest.json（默认看历史新高）
+  function loadNewhigh() {
+    return getJSON(BASE + 'ashare-newhigh/data/latest.json').then(function (j) {
+      var top = (j.top && j.top.h) || [];
+      var h = '<p class="title">历史新高 ' + j.nh + ' 只' + (top.length ? '，' + esc(top[0][0]) + '领跑' : '') + '</p>';
+      h += '<p class="muted" style="margin:0">250日新高 ' + j.nh250 + ' 只 · 涨停 ' + j.lu + ' 家 · 上涨 <span class="up">' + j.up + '</span> / 下跌 <span class="down">' + j.down + '</span></p>';
+      if (top.length) h += '<div class="nh-list">' + top.slice(0, 3).map(function (t, i) {
+        return '<div class="nh"><span class="r">' + (i + 1) + '</span><span class="n">' + esc(t[0]) +
+          (t[4] ? '<small class="nw">新进榜</small>' : t[3] > 1 ? '<small>连续 ' + t[3] + ' 天</small>' : '') +
+          '</span><span class="c">' + t[1] + ' 只</span>' + pct(t[2]) + '</div>';
+      }).join('') + '</div>';
+      if (j.gain && j.gain.length) h += '<div class="chips"><span class="muted">涨幅前列</span>' + j.gain.slice(0, 3).map(function (x) {
+        return '<span>' + esc(x[0]) + ' ' + pct(x[1]) + '</span>';
+      }).join('') + '</div>';
+      setCard('newhigh', md(j.date), h, j.date);
+    }).catch(function () { failCard('newhigh'); });
+  }
+
   function loadNews() {
     var root = BASE + 'finance-news-daily/';
     return getJSON(root + 'days.json').then(function (days) {
@@ -169,10 +188,10 @@
   function refreshAll() {
     var btn = $('refresh');
     btn.classList.add('spin');
-    return Promise.all([loadSignal(), loadAlert(), loadReview(), loadNews(), loadQuant()]).then(function () {
+    return Promise.all([loadSignal(), loadAlert(), loadReview(), loadNewhigh(), loadNews(), loadQuant()]).then(function () {
       btn.classList.remove('spin');
       var n = new Date();
-      $('checked').textContent = '已同步五个网站 · ' + n.getHours() + ':' + String(n.getMinutes()).padStart(2, '0');
+      $('checked').textContent = '已同步六个网站 · ' + n.getHours() + ':' + String(n.getMinutes()).padStart(2, '0');
       store('lastCheck', String(Date.now()));
     });
   }
@@ -228,7 +247,7 @@
   function show(tab) {
     var sub = '';
     if (/^signal\//.test(tab)) { sub = tab.slice(7); tab = 'signal'; }     // signal/策略id：直接打开该策略
-    if (!/^(home|signal|review|news|alert|quant)$/.test(tab)) tab = 'home';
+    if (!/^(home|signal|review|newhigh|news|alert|quant)$/.test(tab)) tab = 'home';
     document.querySelectorAll('.view').forEach(function (v) { v.classList.toggle('active', v.id === 'v-' + tab); });
     document.querySelectorAll('#tabbar button').forEach(function (b) { b.classList.toggle('on', b.dataset.tab === tab); });
     current = tab;
